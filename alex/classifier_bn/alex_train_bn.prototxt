@@ -1,0 +1,226 @@
+display: 1
+
+#vic
+#average_loss: 20
+
+lr_policy: "fixed"
+# lr for normalized softmax
+base_lr: 0.01
+# standard momentum
+momentum: 0.9
+
+# gradient accumulation (https://groups.google.com/forum/#!topic/caffe-users/PMbycfbpKcY)
+# A weight update / iteration is done for batch_size * iter_size inputs at a time. 
+# Each solver iteration reported is accumulated by running `iter_size` calls to forward + backward. See
+iter_size: 1
+
+max_iter: 100000
+weight_decay: 0.0005
+snapshot: 4000
+snapshot_prefix: "conv"
+#test_initialization: false
+debug_info: false
+
+net_param {
+
+
+### data 
+
+layer {
+  name: "data"
+  type: "ROOTData"
+  top: "data"
+  top: "label"
+
+  root_data_param {
+    batch_size: 8
+    filler_config: "train_filler.cfg"
+    filler_name: "Train"
+  }
+}
+
+###conv 1
+
+layer { name: "conv1" type: "Convolution" bottom: "data" top: "conv1"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output: 96 kernel_size: 11 stride: 4
+    weight_filler { type: "msra" }
+  }
+}
+
+
+layer {
+    name: "conv1_bn" type: "BatchNorm" bottom: "conv1" top: "conv1"
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    batch_norm_param { use_global_stats: false }
+}
+
+layer { name: "conv1_scale" type: "Scale" bottom: "conv1" top: "conv1"
+    param { lr_mult: 1 decay_mult: 1 }
+    param { lr_mult: 1 decay_mult: 0 }
+    scale_param { bias_term: true }
+}
+layer { name: "relu1" type: "ReLU" bottom: "conv1" top: "conv1" }
+
+###pool 1
+
+layer { name: "pool1" type: "Pooling" bottom: "conv1" top: "pool1"
+    pooling_param { pool: MAX kernel_size: 3 stride: 2 }
+}
+
+###conv 2
+
+layer { name: "conv2" type: "Convolution" bottom: "pool1" top: "conv2"
+    param { lr_mult: 1 decay_mult: 1}
+    param { lr_mult: 2 decay_mult: 0}
+  convolution_param { num_output: 256 pad: 2 kernel_size: 5 group: 2
+      weight_filler { type: "msra" }
+  }
+}
+
+
+layer {
+    name: "conv2_bn" type: "BatchNorm" bottom: "conv2" top: "conv2"
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    batch_norm_param { use_global_stats: false }
+}
+
+layer { name: "conv2_scale" type: "Scale" bottom: "conv2" top: "conv2"
+    param { lr_mult: 1 decay_mult: 1 }
+    param { lr_mult: 1 decay_mult: 0 }
+    scale_param { bias_term: true }
+}
+
+layer { name: "relu2" type: "ReLU"  bottom: "conv2" top: "conv2" }
+
+### pool2
+
+layer { name: "pool2" type: "Pooling" bottom: "conv2" top: "pool2"
+  pooling_param { pool: MAX kernel_size: 3 stride: 2 }
+}
+
+### conv3
+
+layer { name: "conv3" type: "Convolution" bottom: "pool2" top: "conv3"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output: 384 pad: 1 kernel_size: 3
+    weight_filler { type: "msra" }
+  }
+ }
+
+
+layer {
+    name: "conv3_bn" type: "BatchNorm" bottom: "conv3" top: "conv3"
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    batch_norm_param { use_global_stats: false }
+}
+
+layer { name: "conv3_scale" type: "Scale" bottom: "conv3" top: "conv3"
+    param { lr_mult: 1 decay_mult: 1 }
+    param { lr_mult: 1 decay_mult: 0 }
+    scale_param { bias_term: true }
+}
+layer { name: "relu3" type: "ReLU" bottom: "conv3" top: "conv3" }
+
+
+### conv4
+
+layer { name: "conv4" type: "Convolution" bottom: "conv3" top: "conv4"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  convolution_param { num_output: 384 pad: 1 kernel_size: 3 group: 2
+    weight_filler { type: "msra" }
+  }
+}
+
+layer {
+    name: "conv4_bn" type: "BatchNorm" bottom: "conv4" top: "conv4"
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    batch_norm_param { use_global_stats: false }
+}
+
+layer { name: "conv4_scale" type: "Scale" bottom: "conv4" top: "conv4"
+    param { lr_mult: 1 decay_mult: 1 }
+    param { lr_mult: 1 decay_mult: 0 }
+    scale_param { bias_term: true }
+}
+layer { name: "relu4" type: "ReLU" bottom: "conv4" top: "conv4" }
+
+
+### conv5
+
+layer { name: "conv5" type: "Convolution" bottom: "conv4" top: "conv5"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+ 
+  convolution_param { num_output: 256 pad: 1 kernel_size: 3 group: 2
+      weight_filler { type: "msra" }
+  }
+}
+
+layer {
+    name: "conv5_bn" type: "BatchNorm" bottom: "conv5" top: "conv5"
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    param { lr_mult: 0.0 decay_mult: 0.0}
+    batch_norm_param { use_global_stats: false }
+}
+
+layer { name: "conv5_scale" type: "Scale" bottom: "conv5" top: "conv5"
+    param { lr_mult: 1 decay_mult: 1 }
+    param { lr_mult: 1 decay_mult: 0 }
+    scale_param { bias_term: true }
+}
+layer { name: "relu5" type: "ReLU" bottom: "conv5" top: "conv5" }
+
+### pool5 
+
+layer { name: "pool5" type: "Pooling" bottom: "conv5" top: "pool5" 
+    pooling_param { pool: MAX kernel_size: 3 stride: 2 }
+}
+
+### fc6
+
+layer { name: "fc6_" type: "InnerProduct" bottom: "pool5" top: "fc6_"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  inner_product_param { num_output: 4096
+    weight_filler { type: "msra" }
+  }
+}
+
+
+### fc7
+
+layer { name: "fc7_" type: "InnerProduct" bottom: "fc6_" top: "fc7_"
+  param { lr_mult: 1 decay_mult: 1 }
+  param { lr_mult: 2 decay_mult: 0 }
+  inner_product_param { num_output: 4096
+    weight_filler { type: "msra" }
+  }
+}
+
+### fc8
+
+layer { name: "fc8" type: "InnerProduct" bottom: "fc7_" top: "fc8" 
+ param { lr_mult: 1 decay_mult: 1 }
+   param { lr_mult: 2 decay_mult: 0 }
+   inner_product_param { num_output: 5
+       weight_filler { type: "msra" }
+   }
+}
+
+ layer { name: "accuracy" type: "Accuracy" bottom: "fc8" bottom: "label" top: "accuracy" }
+ layer { name: "loss" type: "SoftmaxWithLoss" bottom: "fc8" bottom: "label" top: "loss" }
+
+}
