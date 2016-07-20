@@ -3,21 +3,31 @@ display: 1
 #vic
 #average_loss: 20
 
-lr_policy: "fixed"
+#lr_policy: "fixed"
 # lr for normalized softmax
-base_lr: 0.001
+#base_lr: 0.001
+base_lr: 0.00005
 # standard momentum
-momentum: 0.9
+# momentum: 0.9
+momentum: 0.0
+weight_decay: 0.001
+lr_policy: "inv"
+gamma: 0.00001
+power: 0.75
 
 # gradient accumulation (https://groups.google.com/forum/#!topic/caffe-users/PMbycfbpKcY)
 # A weight update / iteration is done for batch_size * iter_size inputs at a time. 
 # Each solver iteration reported is accumulated by running `iter_size` calls to forward + backward. See
 iter_size: 1
 
+solver_mode: GPU
+type: "RMSProp"
+rms_decay: 0.90
+
 max_iter: 100000
-weight_decay: 0.0005
+#weight_decay: 0.0005
 snapshot: 4000
-snapshot_prefix: "conv"
+snapshot_prefix: "conv_bn_pretrained_rms"
 #test_initialization: false
 debug_info: false
 
