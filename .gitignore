@@ -1,3 +1,6 @@
 *ipynb
 logs
 models
+*h5
+*.log
+*caffemodel
