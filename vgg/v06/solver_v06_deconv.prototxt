@@ -1,6 +1,6 @@
 
 train_net: "train_v06_deconv.prototxt"
-iter_size: 1
+iter_size: 10
 
 #test_net:  "alex_test.prototxt"
 #test_iter: 100
